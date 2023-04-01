@@ -75,7 +75,9 @@ provider "kubernetes" {
   config_path = null
 }
 
-data "coder_workspace" "me" {}
+data "coder_workspace" "me" {
+
+}
 
 resource "coder_agent" "main" {
   os                     = "linux"
@@ -110,16 +112,16 @@ resource "coder_app" "code-server" {
 
 resource "kubernetes_persistent_volume_claim" "home" {
   metadata {
-    name      = "coder-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}-home"
+    name      = "coder-${lower(data.coder_workspace.me.owner)}-sprint-home"
     namespace = var.namespace
     labels = {
       "app.kubernetes.io/name"     = "coder-pvc"
-      "app.kubernetes.io/instance" = "coder-pvc-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}"
+      "app.kubernetes.io/instance" = "coder-pvc-${lower(data.coder_workspace.me.owner)}-sprint"
       "app.kubernetes.io/part-of"  = "coder"
       // Coder specific labels.
       "com.coder.resource"       = "true"
       "com.coder.workspace.id"   = data.coder_workspace.me.id
-      "com.coder.workspace.name" = data.coder_workspace.me.name
+      "com.coder.workspace.name" = "sprint"
       "com.coder.user.id"        = data.coder_workspace.me.owner_id
       "com.coder.user.username"  = data.coder_workspace.me.owner
     }
@@ -140,23 +142,24 @@ resource "kubernetes_persistent_volume_claim" "home" {
 
 resource "kubernetes_service_account_v1" "user_svc_account" {
   metadata {
-    name = "dev-${data.coder_workspace.me.name}"
+    name = "dev-${lower(data.coder_workspace.me.owner)}-sprint"
     namespace = var.namespace
   }
 }
+
 resource "kubernetes_pod" "main" {
   count = data.coder_workspace.me.start_count
   metadata {
-    name      = "coder-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}"
+    name      = "coder-${lower(data.coder_workspace.me.owner)}-sprint"
     namespace = var.namespace
     labels = {
       "app.kubernetes.io/name"     = "coder-workspace"
-      "app.kubernetes.io/instance" = "coder-workspace-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}"
+      "app.kubernetes.io/instance" = "coder-workspace-${lower(data.coder_workspace.me.owner)}-sprint"
       "app.kubernetes.io/part-of"  = "coder"
       // Coder specific labels.
       "com.coder.resource"       = "true"
       "com.coder.workspace.id"   = data.coder_workspace.me.id
-      "com.coder.workspace.name" = data.coder_workspace.me.name
+      "com.coder.workspace.name" = "sprint"
       "com.coder.user.id"        = data.coder_workspace.me.owner_id
       "com.coder.user.username"  = data.coder_workspace.me.owner
     }
@@ -165,7 +168,7 @@ resource "kubernetes_pod" "main" {
     }
   }
   spec {
-    service_account_name = "dev-${data.coder_workspace.me.name}"
+    service_account_name = "dev-${lower(data.coder_workspace.me.owner)}-sprint"
     security_context {
       run_as_user = "1000"
       fs_group    = "1000"
