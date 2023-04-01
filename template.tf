@@ -152,6 +152,44 @@ resource "kubernetes_service_account_v1" "user_svc_account" {
   }
 }
 
+resource "kubernetes_namespace_v1" "user_dev_namespace" {
+  metadata {
+    name = "dev-${lower(data.coder_workspace.me.owner)}"
+  }
+}
+
+resource "kubernetes_role_v1" "dev_readonly_role" {
+  metadata {
+    name = "dev-readonly-${lower(data.coder_workspace.me.owner)}"
+    namespace = "dev-${lower(data.coder_workspace.me.owner)}"
+ 
+  }
+
+  # Read only role
+  rule {
+    api_groups     = ["*"]
+    resources      = ["*"]
+    verbs          = ["get", "list", "watch"]
+  }
+}
+
+resource "kubernetes_role_binding_v1" "dev_readonly_role_binding" {
+  metadata {
+    name      = "dev-readonly-${lower(data.coder_workspace.me.owner)}"
+    namespace = "dev-${lower(data.coder_workspace.me.owner)}"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = "dev-readonly-${lower(data.coder_workspace.me.owner)}"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "dev-${lower(data.coder_workspace.me.owner)}-sprint"
+    namespace = var.namespace
+  }
+}
+
 resource "kubernetes_pod" "main" {
   count = data.coder_workspace.me.start_count
   metadata {
