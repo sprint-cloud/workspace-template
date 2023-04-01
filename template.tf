@@ -87,8 +87,8 @@ resource "coder_agent" "main" {
   startup_script         = <<-EOT
     set -e
     # Bootstrap home
-    cp -rf /bootstrap/*.* /home/coder/
-    
+    cp -r /etc/skel/. /home/coder
+
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     /tmp/code-server/bin/code-server --install-extension ms-python.python
