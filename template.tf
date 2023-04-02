@@ -15,23 +15,10 @@ provider "coder" {
   feature_use_managed_variables = true
 }
 
-# variable "use_kubeconfig" {
-#   type        = bool
-#   description = <<-EOF
-#   Use host kubeconfig? (true/false)
-
-#   Set this to false if the Coder host is itself running as a Pod on the same
-#   Kubernetes cluster as you are deploying workspaces to.
-
-#   Set this to true if the Coder host is running outside the Kubernetes cluster
-#   for workspaces.  A valid "~/.kube/config" must be present on the Coder host.
-#   EOF
-#   default     = false
-# }
-
 variable "namespace" {
   type        = string
   description = "The Kubernetes namespace to create workspaces in (must exist prior to creating workspaces)"
+  default = "coder-workspaces"
 }
 
 data "coder_parameter" "cpu" {
@@ -43,7 +30,6 @@ data "coder_parameter" "cpu" {
     name  = "2 Cores"
     value = "2"
   }
-
 }
 
 data "coder_parameter" "memory" {
@@ -55,7 +41,6 @@ data "coder_parameter" "memory" {
     name  = "2 GB"
     value = "2"
   }
-
 }
 
 data "coder_parameter" "home_disk_size" {
@@ -75,9 +60,7 @@ provider "kubernetes" {
   config_path = null
 }
 
-data "coder_workspace" "me" {
-
-}
+data "coder_workspace" "me" {}
 
 resource "coder_agent" "main" {
   os                     = "linux"
@@ -91,9 +74,6 @@ resource "coder_agent" "main" {
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
-    /tmp/code-server/bin/code-server --install-extension ms-python.python
-    /tmp/code-server/bin/code-server --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
-    /tmp/code-server/bin/code-server --install-extension ritwickdey.liveserver
     /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
   EOT
 }
@@ -117,16 +97,16 @@ resource "coder_app" "code-server" {
 
 resource "kubernetes_persistent_volume_claim" "home" {
   metadata {
-    name      = "coder-${lower(data.coder_workspace.me.owner)}-sprint-home"
+    name      = "coder-${lower(data.coder_workspace.me.owner)}-home"
     namespace = var.namespace
     labels = {
       "app.kubernetes.io/name"     = "coder-pvc"
-      "app.kubernetes.io/instance" = "coder-pvc-${lower(data.coder_workspace.me.owner)}-sprint"
+      "app.kubernetes.io/instance" = "coder-pvc-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}"
       "app.kubernetes.io/part-of"  = "coder"
       // Coder specific labels.
       "com.coder.resource"       = "true"
       "com.coder.workspace.id"   = data.coder_workspace.me.id
-      "com.coder.workspace.name" = "sprint"
+      "com.coder.workspace.name" = data.coder_workspace.me.name
       "com.coder.user.id"        = data.coder_workspace.me.owner_id
       "com.coder.user.username"  = data.coder_workspace.me.owner
     }
@@ -145,64 +125,19 @@ resource "kubernetes_persistent_volume_claim" "home" {
   }
 }
 
-resource "kubernetes_service_account_v1" "user_svc_account" {
-  metadata {
-    name = "dev-${lower(data.coder_workspace.me.owner)}-sprint"
-    namespace = var.namespace
-  }
-}
-
-resource "kubernetes_namespace_v1" "user_dev_namespace" {
-  metadata {
-    name = "dev-${lower(data.coder_workspace.me.owner)}"
-  }
-}
-
-resource "kubernetes_role_v1" "dev_readonly_role" {
-  metadata {
-    name = "dev-readonly-${lower(data.coder_workspace.me.owner)}"
-    namespace = "dev-${lower(data.coder_workspace.me.owner)}"
- 
-  }
-
-  # Read only role
-  rule {
-    api_groups     = ["*"]
-    resources      = ["*"]
-    verbs          = ["get", "list", "watch"]
-  }
-}
-
-resource "kubernetes_role_binding_v1" "dev_readonly_role_binding" {
-  metadata {
-    name      = "dev-readonly-${lower(data.coder_workspace.me.owner)}"
-    namespace = "dev-${lower(data.coder_workspace.me.owner)}"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "Role"
-    name      = "dev-readonly-${lower(data.coder_workspace.me.owner)}"
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = "dev-${lower(data.coder_workspace.me.owner)}-sprint"
-    namespace = var.namespace
-  }
-}
-
 resource "kubernetes_pod" "main" {
   count = data.coder_workspace.me.start_count
   metadata {
-    name      = "coder-${lower(data.coder_workspace.me.owner)}-sprint"
+    name      = "coder-${lower(data.coder_workspace.me.owner)}"
     namespace = var.namespace
     labels = {
       "app.kubernetes.io/name"     = "coder-workspace"
-      "app.kubernetes.io/instance" = "coder-workspace-${lower(data.coder_workspace.me.owner)}-sprint"
+      "app.kubernetes.io/instance" = "coder-workspace-${lower(data.coder_workspace.me.owner)}-${lower(data.coder_workspace.me.name)}"
       "app.kubernetes.io/part-of"  = "coder"
       // Coder specific labels.
       "com.coder.resource"       = "true"
       "com.coder.workspace.id"   = data.coder_workspace.me.id
-      "com.coder.workspace.name" = "sprint"
+      "com.coder.workspace.name" = data.coder_workspace.me.name
       "com.coder.user.id"        = data.coder_workspace.me.owner_id
       "com.coder.user.username"  = data.coder_workspace.me.owner
     }
@@ -211,7 +146,6 @@ resource "kubernetes_pod" "main" {
     }
   }
   spec {
-    service_account_name = "dev-${lower(data.coder_workspace.me.owner)}-sprint"
     security_context {
       run_as_user = "1000"
       fs_group    = "1000"
@@ -247,7 +181,7 @@ resource "kubernetes_pod" "main" {
         }
         limits = {
           "cpu"    = "${data.coder_parameter.cpu.value}"
-          "memory" = "${data.coder_parameter.memory.value}Gi" 
+          "memory" = "${data.coder_parameter.memory.value}Gi"
         }
       }
       volume_mount {
@@ -278,7 +212,6 @@ resource "kubernetes_pod" "main" {
         size_limit = "2Gi"
       }
     }
-
 
     affinity {
       pod_anti_affinity {
