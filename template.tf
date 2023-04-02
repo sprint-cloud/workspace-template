@@ -70,11 +70,12 @@ resource "coder_agent" "main" {
   startup_script         = <<-EOT
     set -e
     # Bootstrap home
-    cp -r /etc/skel/. /home/coder
+    cp -r /bootstrap/. /home/coder
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
+
   EOT
 }
 
@@ -146,6 +147,7 @@ resource "kubernetes_pod" "main" {
     }
   }
   spec {
+    automount_service_account_token = false
     security_context {
       run_as_user = "1000"
       fs_group    = "1000"
@@ -156,7 +158,7 @@ resource "kubernetes_pod" "main" {
     }
     container {
       name              = "dev"
-      image             = "berglucht/workspace:latest"
+      image             = "berglucht/workspace:production"
       image_pull_policy = "Always"
       command           = ["sh", "-c", coder_agent.main.init_script]
       security_context {
