@@ -112,7 +112,8 @@ resource "kubernetes_manifest" "dev-database" {
       name = "coder-${lower(data.coder_workspace.me.owner)}-db"
       namespace = var.namespace
       labels = {
-        resource-type = "dev-database"
+        "com.coder.user.id" = data.coder_workspace.me.owner_id
+        "spint.resource.type" = "dev-db"
     }  
       annotations = {
         "com.coder.user.email" = data.coder_workspace.me.owner_email
@@ -131,6 +132,39 @@ resource "kubernetes_manifest" "dev-database" {
     }
   }
   
+}
+
+resource "kubernetes_network_policy_v1" "allow-db-connections" {
+  metadata {
+    name = "coder-${lower(data.coder_workspace.me.owner)}-db"
+    namespace = var.namespace
+  }
+  spec {
+    pod_selector {
+        match_expressions {
+              key      = "cnpg.io/cluster"
+              operator = "In"
+              values   = ["coder-${lower(data.coder_workspace.me.owner)}-db"]
+            }
+    }
+  ingress {
+    ports {
+        port     = "5432"
+        protocol = "TCP"
+    }
+    from {
+      pod_selector {
+        match_expressions {
+          key      = "com.coder.user.username"
+          operator = "In"
+          values   = [data.coder_workspace.me.owner]
+        }
+      }
+    }
+
+  }
+    policy_types = ["Ingress"]
+  }
 }
 
 resource "kubernetes_persistent_volume_claim" "home" {
@@ -213,6 +247,12 @@ resource "kubernetes_pod" "main" {
         name  = "CODER_AGENT_TOKEN"
         value = coder_agent.main.token
       }
+
+      env {
+        name = "DB_URL"
+        value = "coder-${lower(data.coder_workspace.me.owner)}-db-rw"
+      }
+
       env_from {
         secret_ref {
           name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
