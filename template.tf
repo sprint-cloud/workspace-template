@@ -96,6 +96,36 @@ resource "coder_app" "code-server" {
   }
 }
 
+### Dev database
+resource "kubernetes_manifest" "dev-database" {
+  manifest = {
+    apiVersion = "postgresql.cnpg.io/v1"
+    kind = "Cluster"
+    metadata = {
+      name = "coder-${lower(data.coder_workspace.me.owner)}-db"
+      namespace = var.namespace
+      labels = {
+        resource-type = "dev-database"
+    }  
+      annotations = {
+        "com.coder.user.email" = data.coder_workspace.me.owner_email
+      }
+    }
+
+    spec = {
+      instances = 1
+      primaryUpdateStrategy = "unsupervised"
+      storage = {
+        size = "1Gi"
+      }
+      monitoring = {
+        enablePodMonitor = true
+      }
+    }
+  }
+  
+}
+
 resource "kubernetes_persistent_volume_claim" "home" {
   metadata {
     name      = "coder-${lower(data.coder_workspace.me.owner)}-home"
@@ -176,6 +206,11 @@ resource "kubernetes_pod" "main" {
         name  = "CODER_AGENT_TOKEN"
         value = coder_agent.main.token
       }
+      env_from {
+        secret_ref {
+          name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
+        }
+      }
       resources {
         requests = {
           "cpu"    = "250m"
@@ -187,6 +222,12 @@ resource "kubernetes_pod" "main" {
         }
       }
       volume_mount {
+        mount_path = "/db-superuser"
+        name       = "db-superuser"
+        read_only  = true
+      }
+
+      volume_mount {
         mount_path = "/home/coder"
         name       = "home"
         read_only  = false
@@ -197,6 +238,18 @@ resource "kubernetes_pod" "main" {
         name       = "tmp-dir"
         read_only  = false
       }
+      volume_mount {
+        mount_path = "/home/coder/docs"
+        name       = "docs"
+        read_only  = false
+      }
+    }
+
+    volume {
+      name = "db-superuser"
+      secret {
+        secret_name = "coder-${lower(data.coder_workspace.me.owner)}-db-superuser"
+      }
     }
 
     volume {
@@ -204,6 +257,14 @@ resource "kubernetes_pod" "main" {
       persistent_volume_claim {
         claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
         read_only  = false
+      }
+    }
+
+    volume {
+      name = "docs"
+      persistent_volume_claim {
+        claim_name = "docs"
+        read_only  = true
       }
     }
 
@@ -235,4 +296,5 @@ resource "kubernetes_pod" "main" {
       }
     }
   }
+  depends_on = [ kubernetes_manifest.dev-database ]
 }
