@@ -62,6 +62,13 @@ provider "kubernetes" {
 
 data "coder_workspace" "me" {}
 
+data "kubernetes_config_map_v1" "coder_image_config" {
+  metadata {
+    name = "coder-image"
+    namespace = "coder-workspaces"
+  }
+}
+
 resource "coder_agent" "main" {
   os                     = "linux"
   arch                   = "amd64"
@@ -188,7 +195,7 @@ resource "kubernetes_pod" "main" {
     }
     container {
       name              = "dev"
-      image             = "berglucht/workspace:production"
+      image             = data.kubernetes_config_map_v1.coder_image_config.data.image
       image_pull_policy = "Always"
       command           = ["sh", "-c", coder_agent.main.init_script]
       security_context {
