@@ -1,1 +1,5 @@
 *.tar
+.terraform
+*.tfstate
+*.tfstate.backup
+*.hcl
