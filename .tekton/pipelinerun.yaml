@@ -85,7 +85,7 @@ spec:
               image: ghcr.io/sprint-cloud/pipeline-worker:49defd372f5cb0dbb2faa7b765f91dfb8da0900f
               workingDir: $(workspaces.source.path)
               script: |
-                coder template push --yes
+                coder template push --yes --name workspace-template
   workspaces:
   - name: source
     volumeClaimTemplate:
