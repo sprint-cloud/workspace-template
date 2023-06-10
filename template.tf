@@ -112,12 +112,8 @@ resource "kubernetes_manifest" "dev-database" {
       name = "coder-${lower(data.coder_workspace.me.owner)}-db"
       namespace = var.namespace
       labels = {
-        "com.coder.user.id" = data.coder_workspace.me.owner_id
         "spint.resource.type" = "dev-db"
-    }  
-      annotations = {
-        "com.coder.user.email" = data.coder_workspace.me.owner_email
-      }
+      }  
     }
 
     spec = {
@@ -229,7 +225,7 @@ resource "kubernetes_pod" "main" {
     }
     container {
       name              = "dev"
-      image             = data.kubernetes_config_map_v1.coder_image_config.data.image
+      image             = "ghcr.io/sprint-cloud/workspace-image:12c69742630f6849fc8c8b756e83a69c944c612e"
       image_pull_policy = "Always"
       command           = ["sh", "-c", coder_agent.main.init_script]
       security_context {
@@ -343,5 +339,4 @@ resource "kubernetes_pod" "main" {
       }
     }
   }
-  depends_on = [ kubernetes_manifest.dev-database ]
 }
