@@ -27,6 +27,9 @@ metadata:
     # How many runs we want to keep.
     pipelinesascode.tekton.dev/max-keep-runs: "5"
 spec:
+  podTemplate:
+    securityContext:
+      fsGroup: 65532
   params:
     # The variable with brackets are special to Pipelines as Code
     # They will automatically be expanded with the events from Github.
