@@ -25,7 +25,7 @@ metadata:
     # pipelinesascode.tekton.dev/task-2: "[curl, buildah]"
 
     # How many runs we want to keep.
-    pipelinesascode.tekton.dev/max-keep-runs: "5"
+    pipelinesascode.tekton.dev/max-keep-runs: "1"
 spec:
   podTemplate:
     securityContext:
@@ -58,8 +58,6 @@ spec:
             value: $(params.repo_url)
           - name: revision
             value: $(params.revision)
-      # Customize this task if you like, or just do a taskRef
-      # to one of the hub task.
       - name: release-coder-template
         runAfter:
           - fetch-repository
