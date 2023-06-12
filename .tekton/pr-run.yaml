@@ -41,7 +41,7 @@ spec:
     - name: template-name
       value: workspace-template
     - name: testing-namespace
-      value: "{{ namespace }}"
+      value: "{{ target_namespace }}"
     - name: testing-tag
       value: "{{ pull_request_number }}"
   pipelineRef:
