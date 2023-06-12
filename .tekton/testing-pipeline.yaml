@@ -53,7 +53,6 @@ spec:
               type: string
           steps:
             - name: create-vcluster
-              workingDir: $(workspaces.source.path)
               image: ghcr.io/sprint-cloud/pipeline-worker:66567fc4a0d65b4e37f03282c6f13988445d52cc
               script: |
                   vcluster create workspace-test-$(params.tag) --namespace $(params.namespace)
