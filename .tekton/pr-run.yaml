@@ -31,6 +31,7 @@ spec:
   podTemplate:
     securityContext:
       fsGroup: 65532
+      runAsNonRoot: true
   params:
     - name: repo_url
       value: "{{ repo_url }}"

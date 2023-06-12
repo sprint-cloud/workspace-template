@@ -59,9 +59,6 @@ spec:
                   vcluster create workspace-test-$(params.tag) --namespace $(params.namespace)
                   sleep 15
                   vcluster delete workspace-test-$(params.tag) --namespace $(params.namespace)
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 65532
 
     
                 
