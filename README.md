@@ -1,2 +1,2 @@
 # workspace-template
-Coder terraform template for creating wordpaces
+Coder terraform template for creating wordpacestrigger pipeline
