@@ -40,6 +40,10 @@ spec:
       value: "0.24.0"
     - name: template-name
       value: workspace-template
+    - name: testing-namespace
+      value: "{{ namespace }}"
+    - name: testing-tag
+      value: "{{ pull_request_number }}"
   pipelineRef:
     name: coder-testing-pipeline
   workspaces:
