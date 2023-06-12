@@ -32,6 +32,7 @@ spec:
     securityContext:
       fsGroup: 65532
       runAsNonRoot: true
+      runAsUser: 1001
   params:
     - name: repo_url
       value: "{{ repo_url }}"
