@@ -35,13 +35,17 @@ spec:
             value: $(params.revision)
       - name: testing-coder-template
         workspaces:
-          - name: source
+          - name: template
+            workspace: source
         params:
           - name: namespace
             value: $(params.testing-namespace)
           - name: tag
             value: $(params.testing-tag)
         taskSpec:
+          workspaces:
+            - name: template
+              description: Terraform template for Coder workspaces
           params:
             - name: namespace
               type: string
