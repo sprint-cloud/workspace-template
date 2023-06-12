@@ -12,6 +12,10 @@ spec:
       type: string
     - name: template-name
       type: string
+    - name: testing-namespace
+      type: string
+    - name: testing-tag
+      type: string
   workspaces:
     - name: source
     - name: basic-auth
@@ -29,3 +33,28 @@ spec:
             value: $(params.repo_url)
           - name: revision
             value: $(params.revision)
+      - name: testing-coder-template
+        workspaces:
+          - name: source
+        params:
+          - name: namespace
+            value: $(params.testing-namespace)
+          - name: tag
+            value: $(params.testing-tag)
+        taskSpec:
+          params:
+            - name: namespace
+              type: string
+            - name: tag
+              type: string
+          steps:
+            - name: create-vcluster
+              workingDir: $(workspaces.source.path)
+              image: ghcr.io/sprint-cloud/pipeline-worker:66567fc4a0d65b4e37f03282c6f13988445d52cc
+              script: |
+                  vcluster create workspace-test-$(params.tag) --namespace $(params.namespace)
+                  sleep 15
+                  vcluster delete workspace-test-$(params.tag) --namespace $(params.namespace)
+
+    
+                

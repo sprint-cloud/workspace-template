@@ -80,7 +80,7 @@ spec:
                     secretKeyRef:
                       name: coder-auth
                       key: CODER_URL
-              image: ghcr.io/sprint-cloud/pipeline-worker:49defd372f5cb0dbb2faa7b765f91dfb8da0900f
+              image: ghcr.io/sprint-cloud/pipeline-worker:66567fc4a0d65b4e37f03282c6f13988445d52cc
               workingDir: $(workspaces.source.path)
               script: |
                 coder template push --yes workspace-template
