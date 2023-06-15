@@ -55,12 +55,12 @@ spec:
               type: string
           steps:
             - name: create-vcluster
-              image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
+              image: ghcr.io/sprint-cloud/pipeline-worker:latest
               workdir: $(workspaces.output.path)
               script: |
                   vcluster create workspace-test-$(params.tag) --namespace=$(params.namespace) --connect=false
             - name: install-coder-db
-              image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
+              image: ghcr.io/sprint-cloud/pipeline-worker:latest
               workdir: $(workspaces.output.path)
               script: |
                   helm repo add bitnami https://charts.bitnami.com/bitnami
