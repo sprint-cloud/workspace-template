@@ -59,7 +59,7 @@ spec:
               workdir: $(workspaces.output.path)
               script: |
                   vcluster create workspace-test-$(params.tag) --namespace=$(params.namespace) --connect=false
-            - name: Install-Coder
+            - name: install-coder
               image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
               workdir: $(workspaces.output.path)
               script: |
