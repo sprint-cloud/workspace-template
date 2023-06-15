@@ -34,6 +34,8 @@ spec:
           - name: revision
             value: $(params.revision)
       - name: testing-coder-template
+        runAfter:
+            - fetch-repository
         workspaces:
           - name: template
             workspace: source
@@ -43,8 +45,6 @@ spec:
           - name: tag
             value: $(params.testing-tag)
         taskSpec:
-          runAfter:
-            - fetch-repository
           workspaces:
             - name: template
               description: Terraform template for Coder workspaces
