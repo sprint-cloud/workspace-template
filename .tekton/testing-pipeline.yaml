@@ -53,6 +53,8 @@ spec:
               type: string
             - name: tag
               type: string
+            - name: coder-helm-version
+              type: string
           steps:
             - name: create-vcluster
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
@@ -73,6 +75,25 @@ spec:
                   --set auth.password=coder \
                   --set auth.database=coder \
                   --set persistence.size=10Gi
+            - name: install-coder
+              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+              workdir: $(workspaces.template.path)
+              script: |
+                  helm repo add coder-v2 https://helm.coder.com/v2
+                  helm repo update
+
+                  # Create DB secret
+                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
+                  kubectl create secret generic coder-db-url -n coder \
+                  --from-literal=url="postgres://coder:coder@coder-db-postgresql.coder.svc.cluster.local:5432/coder?sslmode=disable"
+
+                  # Install Coder
+                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
+                  helm install coder coder-v2/coder \
+                  --namespace coder \
+                  --values $(workspaces.template.path)/coder.values.yaml
+                  --version $(params.coder-helm-version)
+
   finally:
       - name: cleanup
         params:
