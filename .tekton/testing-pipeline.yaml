@@ -59,7 +59,7 @@ spec:
               workdir: $(workspaces.output.path)
               script: |
                   vcluster create workspace-test-$(params.tag) --namespace=$(params.namespace) --connect=false
-            - name: install-coder-db
+            - name: create-coder-db
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.output.path)
               script: |
@@ -68,6 +68,7 @@ spec:
                   vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
                   helm install coder-db bitnami/postgresql \
                   --namespace coder \
+                  --create-namespace \
                   --set auth.username=coder \
                   --set auth.password=coder \
                   --set auth.database=coder \
