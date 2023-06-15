@@ -61,7 +61,7 @@ spec:
                   pwd
                   vcluster create workspace-test-$(params.tag) --namespace $(params.namespace) --connect false
   finally:
-      - name: cleanup testing
+      - name: cleanup
         params:
           - name: namespace
             value: $(params.testing-namespace)
