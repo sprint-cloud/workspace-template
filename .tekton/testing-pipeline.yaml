@@ -59,8 +59,24 @@ spec:
               workdir: $(workspaces.output.path)
               script: |
                   pwd
-                  vcluster create workspace-test-$(params.tag) --namespace $(params.namespace)
-                  sleep 15
+                  vcluster create workspace-test-$(params.tag) --namespace $(params.namespace) --connect false
+  finally:
+      - name: cleanup testing
+        params:
+          - name: namespace
+            value: $(params.testing-namespace)
+          - name: tag
+            value: $(params.testing-tag)
+        taskSpec:
+          params:
+            - name: namespace
+              type: string
+            - name: tag
+              type: string
+          steps:
+            - name: create-vcluster
+              image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
+              script: |
                   vcluster delete workspace-test-$(params.tag) --namespace $(params.namespace)
 
     
