@@ -43,6 +43,8 @@ spec:
           - name: tag
             value: $(params.testing-tag)
         taskSpec:
+          runAfter:
+            - fetch-repository
           workspaces:
             - name: template
               description: Terraform template for Coder workspaces
@@ -56,6 +58,7 @@ spec:
               image: ghcr.io/sprint-cloud/pipeline-worker:66567fc4a0d65b4e37f03282c6f13988445d52cc
               workdir: $(workspaces.output.path)
               script: |
+                  pwd
                   vcluster create workspace-test-$(params.tag) --namespace $(params.namespace)
                   sleep 15
                   vcluster delete workspace-test-$(params.tag) --namespace $(params.namespace)
