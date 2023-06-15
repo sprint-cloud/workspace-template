@@ -54,6 +54,7 @@ spec:
           steps:
             - name: create-vcluster
               image: ghcr.io/sprint-cloud/pipeline-worker:66567fc4a0d65b4e37f03282c6f13988445d52cc
+              workdir: $(workspaces.output.path)
               script: |
                   vcluster create workspace-test-$(params.tag) --namespace $(params.namespace)
                   sleep 15
