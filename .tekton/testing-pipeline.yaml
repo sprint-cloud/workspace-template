@@ -45,7 +45,7 @@ spec:
           - name: tag
             value: $(params.testing-tag)
           - name: coder-helm-version
-            value: $(params.coder-helm-version)s
+            value: $(params.coder-helm-version)
         taskSpec:
           workspaces:
             - name: template
