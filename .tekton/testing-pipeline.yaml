@@ -109,7 +109,7 @@ spec:
                 --first-user-password=Testingcoder123! \
                 --first-user-username=testing \
                 --first-user-trial=false
-                coder template create -y
+                coder template create -y -d $(workspaces.template.path)
               
   finally:
       - name: cleanup
