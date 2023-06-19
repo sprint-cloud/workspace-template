@@ -97,7 +97,7 @@ spec:
                   --namespace coder \
                   --values $(workspaces.template.path)/coder.values.yaml \
                   --version $(params.coder-helm-version)
-                  sleep 60
+                  sleep 20
 
             - name: bootstrap-coder
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
