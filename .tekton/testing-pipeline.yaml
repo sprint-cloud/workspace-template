@@ -100,7 +100,7 @@ spec:
                   vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
                   kubectl wait pods -n coder -l app.kubernetes.io/instance=coder --for condition=Ready --timeout=360s
 
-            - name: bootstrap-coder
+            - name: create-workspace
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
               script: |
@@ -109,18 +109,8 @@ spec:
                 --first-user-password=Testingcoder123! \
                 --first-user-username=testing \
                 --first-user-trial=false
-                coder token create > .coder-token
-
-            - name: test-workspace
-              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
-              workdir: $(workspaces.template.path)
-              script: |
-                #coder --url http://coder-x-coder-x-workspace-test-$(params.tag) tokens list
-                cat .coder-token
+                coder template create -y
               
-              
-
-
   finally:
       - name: cleanup
         params:
