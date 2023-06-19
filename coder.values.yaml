@@ -11,8 +11,4 @@ coder:
     #   value: testing@example.com
     # - name: CODER_FIRST_USER_PASSWORD
     #   value: testing123
-    #  
-mapServices:
-  fromVirtual:
-  - from: coder/coder
-    to: coder-testing
+    # 
