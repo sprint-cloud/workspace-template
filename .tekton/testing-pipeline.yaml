@@ -94,8 +94,7 @@ spec:
                   helm install coder coder-v2/coder \
                   --namespace coder \
                   --values $(workspaces.template.path)/coder.values.yaml \
-                  --version $(params.coder-helm-version) \
-                  --wait
+                  --version $(params.coder-helm-version)
 
 
             - name: bootstrap-coder
