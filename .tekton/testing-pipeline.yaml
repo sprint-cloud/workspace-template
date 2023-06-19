@@ -79,6 +79,14 @@ spec:
                   --set auth.password=coder \
                   --set auth.database=coder \
                   --set persistence.size=10Gi
+            - name: install-cnpg-operator
+              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+              script: |
+                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
+                  kubectl apply -f \
+                  https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.20/releases/cnpg-1.20.1.yaml
+                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
+                  kubectl wait pods -n coder -l app.kubernetes.io/instance=cloudnative-pg --for condition=Ready --timeout=360s
             - name: install-coder
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
