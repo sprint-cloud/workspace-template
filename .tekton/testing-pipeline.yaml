@@ -51,8 +51,6 @@ spec:
               type: string
             - name: tag
               type: string
-            - name: coder-helm-version
-              type: string
           steps:
             - name: create-template
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
