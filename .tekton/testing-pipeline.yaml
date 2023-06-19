@@ -98,7 +98,7 @@ spec:
                   --values $(workspaces.template.path)/coder.values.yaml \
                   --version $(params.coder-helm-version)
                   vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  kubectl wait pods -n coder -l app.kubernetes.io/instance=coder --for condition=Ready --timeout=90s
+                  kubectl wait pods -n coder -l app.kubernetes.io/instance=coder --for condition=Ready --timeout=360s
 
             - name: bootstrap-coder
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
