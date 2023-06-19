@@ -44,8 +44,6 @@ spec:
             value: $(params.testing-namespace)
           - name: tag
             value: $(params.testing-tag)
-          - name: coder-helm-version
-            value: $(params.coder-helm-version)
         taskSpec:
           workspaces:
             - name: template
@@ -58,66 +56,17 @@ spec:
             - name: coder-helm-version
               type: string
           steps:
-            - name: create-vcluster
-              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
-              workdir: $(workspaces.output.path)
-              script: |
-                  vcluster create workspace-test-$(params.tag) --namespace=$(params.namespace) --connect=false
-                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  kubectl get ns
-            - name: create-coder-db
-              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
-              workdir: $(workspaces.output.path)
-              script: |
-                  helm repo add bitnami https://charts.bitnami.com/bitnami
-                  helm repo update
-                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  helm install coder-db bitnami/postgresql \
-                  --namespace coder \
-                  --create-namespace \
-                  --set auth.username=coder \
-                  --set auth.password=coder \
-                  --set auth.database=coder \
-                  --set persistence.size=10Gi
-            - name: install-cnpg-operator
-              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
-              script: |
-                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  kubectl apply -f \
-                  https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.20/releases/cnpg-1.20.1.yaml
-                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  kubectl wait pods -n cnpg-system -l app.kubernetes.io/name=cloudnative-pg --for condition=Ready --timeout=360s
-            - name: install-coder
+            - name: create-template
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
+              env:
+                - name: CODER_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: coder-testing-auth
+                      key: token
               script: |
-                  helm repo add coder-v2 https://helm.coder.com/v2
-                  helm repo update
-
-                  # Create DB secret
-                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  kubectl create secret generic coder-db-url -n coder \
-                  --from-literal=url="postgres://coder:coder@coder-db-postgresql.coder.svc.cluster.local:5432/coder?sslmode=disable"
-
-                  # Install Coder
-                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  helm install coder coder-v2/coder \
-                  --namespace coder \
-                  --values $(workspaces.template.path)/coder.values.yaml \
-                  --version $(params.coder-helm-version)
-                  vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
-                  kubectl wait pods -n coder -l app.kubernetes.io/instance=coder --for condition=Ready --timeout=360s
-
-            - name: create-workspace
-              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
-              workdir: $(workspaces.template.path)
-              script: |
-                coder --url http://coder-x-coder-x-workspace-test-$(params.tag) login \
-                --first-user-email test@example.com \
-                --first-user-password=Testingcoder123! \
-                --first-user-username=testing \
-                --first-user-trial=false
-                coder template create -y -d $(workspaces.template.path)
+                coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu template create -y -d $(workspaces.template.path) PR-$(params.testing-tag)
               
   finally:
       - name: cleanup
