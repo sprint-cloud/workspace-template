@@ -94,7 +94,10 @@ spec:
                   helm install coder coder-v2/coder \
                   --namespace coder \
                   --values $(workspaces.template.path)/coder.values.yaml \
-                  --version $(params.coder-helm-version)
+                  --version $(params.coder-helm-version) \
+                  --wait
+
+
             - name: bootstrap-coder
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
