@@ -95,6 +95,13 @@ spec:
                   --namespace coder \
                   --values $(workspaces.template.path)/coder.values.yaml \
                   --version $(params.coder-helm-version)
+            - name: bootstrap-coder
+              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+              workdir: $(workspaces.template.path)
+              script: |
+                coder --url http://coder.coder.svc login --first-user-email test@example.com --first-user-password=Testingcoder123! --first-user-username=testing --first-user-trial=false
+                kubectl -n coder create secret generic coder-token --from-literal=token=$(coder token create)
+                kubectl -n coder get secret coder-token -o yaml
 
   finally:
       - name: cleanup
