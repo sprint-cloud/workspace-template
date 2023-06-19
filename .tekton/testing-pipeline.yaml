@@ -100,7 +100,9 @@ spec:
               workdir: $(workspaces.template.path)
               script: |
                 coder --url http://coder.coder.svc login --first-user-email test@example.com --first-user-password=Testingcoder123! --first-user-username=testing --first-user-trial=false
+                vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
                 kubectl -n coder create secret generic coder-token --from-literal=token=$(coder token create)
+                vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
                 kubectl -n coder get secret coder-token -o yaml
 
   finally:
