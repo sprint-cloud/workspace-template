@@ -119,8 +119,9 @@ spec:
               env:
                 - name: CODER_SESSION_TOKEN
                   valueFrom:
-                    name: coder-token
-                    key: token
+                    secretKeyRef:
+                      name: coder-token
+                      key: token
               script: |
                 coder --url http://coder-x-coder-x-workspace-test-$(params.tag) tokens list
               
