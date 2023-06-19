@@ -8,8 +8,6 @@ spec:
       type: string
     - name: revision
       type: string
-    - name: coder-helm-version
-      type: string
     - name: template-name
       type: string
     - name: testing-namespace

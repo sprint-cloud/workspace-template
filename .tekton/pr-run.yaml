@@ -37,8 +37,6 @@ spec:
       value: "{{ repo_url }}"
     - name: revision
       value: "{{ revision }}"
-    - name: coder-helm-version
-      value: "0.24.0"
     - name: template-name
       value: workspace-template
     - name: testing-namespace
