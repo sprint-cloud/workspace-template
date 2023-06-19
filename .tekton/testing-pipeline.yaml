@@ -101,7 +101,7 @@ spec:
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
               script: |
-                coder --url http://coder-testing login \
+                coder --url http://coder-x-coder-x-workspace-test-$(params.tag) login \
                 --first-user-email test@example.com \
                 --first-user-password=Testingcoder123! \
                 --first-user-username=testing \
