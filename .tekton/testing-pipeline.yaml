@@ -95,14 +95,13 @@ spec:
                   --namespace coder \
                   --values $(workspaces.template.path)/coder.values.yaml \
                   --version $(params.coder-helm-version)
-                  sleep 20
-
+                  sleep 60
 
             - name: bootstrap-coder
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
               script: |
-                coder --url http://coder-testing.$(params.namespace).svc login \
+                coder --url http://coder-testing login \
                 --first-user-email test@example.com \
                 --first-user-password=Testingcoder123! \
                 --first-user-username=testing \
