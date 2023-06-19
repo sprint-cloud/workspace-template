@@ -97,7 +97,7 @@ spec:
                   --namespace coder \
                   --values $(workspaces.template.path)/coder.values.yaml \
                   --version $(params.coder-helm-version)
-                  sleep 20
+                  sleep 60
 
             - name: bootstrap-coder
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
@@ -108,10 +108,8 @@ spec:
                 --first-user-password=Testingcoder123! \
                 --first-user-username=testing \
                 --first-user-trial=false
-                vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
                 coder token create > .coder-token
 
-            
             - name: test-workspace
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
