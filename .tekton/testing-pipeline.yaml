@@ -95,6 +95,7 @@ spec:
                   --namespace coder \
                   --values $(workspaces.template.path)/coder.values.yaml \
                   --version $(params.coder-helm-version)
+                  sleep 20
 
 
             - name: bootstrap-coder
