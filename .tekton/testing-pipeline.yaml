@@ -112,6 +112,20 @@ spec:
                 kubectl -n coder create secret generic coder-token --from-literal=token=$(coder token create)
                 vcluster connect workspace-test-$(params.tag) --namespace=$(params.namespace) -- \
                 kubectl -n coder get secret coder-token -o yaml
+            
+            - name: test-workspace
+              image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+              workdir: $(workspaces.template.path)
+              env:
+                - name: CODER_SESSION_TOKEN
+                  valueFrom:
+                    name: coder-token
+                    key: token
+              script: |
+                coder --url http://coder-x-coder-x-workspace-test-$(params.tag) tokens list
+              
+              
+
 
   finally:
       - name: cleanup
