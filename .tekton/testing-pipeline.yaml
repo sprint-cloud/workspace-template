@@ -73,7 +73,7 @@ spec:
                       name: coder-testing-auth
                       key: token
               script: |
-                coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu create -y PR-$(params.testing-tag) PR-$(params.testing-tag)-workspace
+                coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu create -y --template=PR-$(params.testing-tag) PR-$(params.testing-tag)-workspace
               
   finally:
       - name: cleanup
