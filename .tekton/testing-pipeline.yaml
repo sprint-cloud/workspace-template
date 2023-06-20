@@ -91,10 +91,12 @@ spec:
           steps:
             - name: delete-workspace
               image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
+              onError: continue
               script: |
                   coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu -y delete "PR-$(params.testing-tag)-workspace"
             - name: delete-template
               image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
+              onError: continue
               script: |
                   coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu template delete -y PR-$(params.testing-tag)
 
