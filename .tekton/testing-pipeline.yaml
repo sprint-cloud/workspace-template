@@ -62,7 +62,8 @@ spec:
                       name: coder-testing-auth
                       key: token
               script: |
-                coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu template create -y -d $(workspaces.template.path) PR-$(params.testing-tag)
+                coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu \
+                template create -y -d $(workspaces.template.path) PR-$(params.testing-tag)
             - name: create-workspace
               image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
               workdir: $(workspaces.template.path)
@@ -73,7 +74,10 @@ spec:
                       name: coder-testing-auth
                       key: token
               script: |
-                coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu create -y --template=PR-$(params.testing-tag) PR-$(params.testing-tag)-workspace
+                coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu \
+                create -y --template=PR-$(params.testing-tag) PR-$(params.testing-tag)-workspace \
+                --rich-parameter-file=$(workspaces.template.path)/testing.tfvars
+
               
   finally:
       - name: cleanup
