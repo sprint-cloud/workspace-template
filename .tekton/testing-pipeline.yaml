@@ -92,11 +92,23 @@ spec:
             - name: delete-workspace
               image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
               onError: continue
+              env:
+                - name: CODER_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: coder-testing-auth
+                      key: token
               script: |
                   coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu delete --yes "PR-$(params.testing-tag)-workspace"
             - name: delete-template
               image: ghcr.io/sprint-cloud/pipeline-worker:3bc7c6958c8b3b694b94c024a02cb5694a07a649
               onError: continue
+              env:
+                - name: CODER_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: coder-testing-auth
+                      key: token
               script: |
                   coder --token $CODER_TOKEN --url https://workspace-testing.luchtenberg.eu template delete --yes PR-$(params.testing-tag)
 
