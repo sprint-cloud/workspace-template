@@ -19,6 +19,9 @@ spec:
             secretKeyRef:
               name: $(params.coder-token-secret)
               key: token
+      results:
+        - name: template-exists
+          description: State of Coder template
       script: |
         coder template versions list $(params.template-name)
         if [ $0 -eq 0]
