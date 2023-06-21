@@ -25,5 +25,5 @@ spec:
       script: |
           echo "\"CPU (cores)\": 2\n\"Memory (GB)\": 2\n\"Home Disk Size (GB)\": 10" > /tmp/workspace-values.vars
           coder --token $CODER_TOKEN --url $(params.coder-url) \
-          create -y --template=$(template-name) $(params.workspace-name) \
+          create -y --template=$(params.template-name) $(params.workspace-name) \
           --rich-parameter-file=/tmp/workspace-values.vars
