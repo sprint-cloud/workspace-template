@@ -21,7 +21,7 @@ spec:
         - name: CODER_TOKEN
           valueFrom:
             secretKeyRef:
-              name: $(coder-token-secret)
+              name: $(params.coder-token-secret)
               key: token
       script: |
         coder --token $CODER_TOKEN --url $(params.coder-url) \
