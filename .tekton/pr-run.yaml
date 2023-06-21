@@ -38,11 +38,11 @@ spec:
     - name: revision
       value: "{{ revision }}"
     - name: template-name
-      value: workspace-template
-    - name: testing-namespace
-      value: "{{ target_namespace }}"
-    - name: testing-tag
-      value: "{{ pull_request_number }}"
+      value: "PR-{{ pull_request_number }}"
+    - name: workspace-name
+      value: "PR-{{ pull_request_number }}-test"
+    - name: coder-url
+      value: "https://workspace-testing.luchtenberg.eu"
   pipelineRef:
     name: coder-testing-pipeline
   workspaces:
