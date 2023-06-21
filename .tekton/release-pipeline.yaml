@@ -32,7 +32,8 @@ spec:
           - name: revision
             value: $(params.revision)
       - name: check-existence-template
-        taskRef: check-existence-template
+        taskRef: 
+          name: check-existence-template
         params:
           - name: template-name
             value: $(params.template-name)
