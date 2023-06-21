@@ -24,7 +24,6 @@ spec:
               key: token
       script: |
           printf "\"CPU (cores)\": 2\n\"Memory (GB)\": 2\n\"Home Disk Size (GB)\": 10" > /tmp/workspace-values.yaml
-          cat /tmp/workspace-values.yaml
           coder --token $CODER_TOKEN --url $(params.coder-url) \
           create -y --template=$(params.template-name) $(params.workspace-name) \
           --rich-parameter-file=/tmp/workspace-values.yaml
