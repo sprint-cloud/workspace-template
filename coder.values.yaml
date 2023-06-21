@@ -1,0 +1,14 @@
+coder:
+  env:
+    - name: CODER_PG_CONNECTION_URL
+      valueFrom:
+        secretKeyRef:
+          name: coder-db-url
+          key: url
+    # - name: CODER_FIRST_USER_USERNAME
+    #   value: testing
+    # - name: CODER_FIRST_USER_EMAIL
+    #   value: testing@example.com
+    # - name: CODER_FIRST_USER_PASSWORD
+    #   value: testing123
+    # 

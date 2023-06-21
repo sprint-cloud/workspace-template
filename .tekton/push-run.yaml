@@ -2,11 +2,11 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: workspace-template-pr
+  name: workspace-template-release
   annotations:
     # The event we are targeting as seen from the webhook payload
     # this can be an array too, i.e: [pull_request, push]
-    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+    pipelinesascode.tekton.dev/on-event: "[push]"
 
     # The branch or tag we are targeting (ie: main, refs/tags/*)
     pipelinesascode.tekton.dev/on-target-branch: "[main]"
@@ -38,13 +38,11 @@ spec:
     - name: revision
       value: "{{ revision }}"
     - name: template-name
-      value: "PR-{{ pull_request_number }}"
-    - name: workspace-name
-      value: "PR-{{ pull_request_number }}-test"
+      value: "workspace-template"
     - name: coder-url
       value: "https://workspace-testing.luchtenberg.eu"
   pipelineRef:
-    name: coder-testing-pipeline
+    name: coder-release-pipeline
   workspaces:
   - name: source
     volumeClaimTemplate:

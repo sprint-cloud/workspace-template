@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: update-coder-template
+spec:
+  workspaces:
+    - name: template
+      description: Terraform template for Coder workspaces
+  params:
+    - name: template-name
+      type: string
+    - name: coder-url
+      type: string
+    - name: coder-token-secret
+      type: string
+  steps:
+    - name: update-template
+      image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+      workdir: $(workspaces.template.path)
+      env:
+        - name: CODER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: $(params.coder-token-secret)
+              key: token
+      script: |
+        coder --token $CODER_TOKEN --url $(params.coder-url) \
+        template push -y -d $(workspaces.template.path) --name $(params.template-name)

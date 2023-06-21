@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: coder-testing-pipeline
+  name: coder-release-pipeline
 spec:
   params:
     - name: repo_url
@@ -31,11 +31,25 @@ spec:
             value: $(params.repo_url)
           - name: revision
             value: $(params.revision)
+      - name: check-existence-template
+        taskRef: 
+          name: check-existence-template
+        params:
+          - name: template-name
+            value: $(params.template-name)
+          - name: coder-url
+            value: "$(params.coder-url)"
+          - name: coder-token-secret
+            value: coder-prod-auth
       - name: upload-coder-template
         taskRef: 
           name: create-coder-template
         runAfter:
             - fetch-repository
+        when:
+          - input: "$(results.check-existence-template.template-exists)"
+            operator: in
+            values: ["false"] 
         workspaces:
           - name: template
             workspace: source
@@ -45,34 +59,28 @@ spec:
           - name: coder-url
             value: $(params.coder-url)
           - name: coder-token-secret
-            value: coder-testing-auth
-      - name: test-coder-workspace
+            value: coder-prod-auth
+      - name: update-coder-template
         taskRef: 
-          name: create-coder-workspace
+          name: update-coder-template
         runAfter:
-          - upload-coder-template
+            - fetch-repository
+        when:
+          - input: "$(results.check-existence-template.template-exists)"
+            operator: in
+            values: ["true"] 
+        workspaces:
+          - name: template
+            workspace: source
         params:
-          - name: workspace-name
-            value: $(params.workspace-name)
           - name: template-name
             value: $(params.template-name)
           - name: coder-url
             value: $(params.coder-url)
           - name: coder-token-secret
-            value: coder-testing-auth
-  finally:
-      - name: cleanup
-        taskRef: 
-          name: cleanup-workspace-test
-        params:
-          - name: workspace-name
-            value: $(params.workspace-name)
-          - name: template-name
-            value: $(params.template-name)
-          - name: coder-url
-            value: $(params.coder-url)
-          - name: coder-token-secret
-            value: coder-testing-auth
+            value: coder-prod-auth
+      
+        
 
 
     

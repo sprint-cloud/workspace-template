@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: create-coder-workspace
+spec:
+  params:
+    - name: workspace-name
+      type: string
+    - name: template-name
+      type: string
+    - name: coder-url
+      type: string
+    - name: coder-token-secret
+      type: string
+  steps:
+    - name: create-workspace
+      image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+      workdir: $(workspaces.template.path)
+      env:
+        - name: CODER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: $(params.coder-token-secret)
+              key: token
+      script: |
+          printf "\"CPU (cores)\": 2\n\"Memory (GB)\": 2\n\"Home Disk Size (GB)\": 10" > /tmp/workspace-values.yaml
+          coder --token $CODER_TOKEN --url $(params.coder-url) \
+          create -y --template=$(params.template-name) $(params.workspace-name) \
+          --rich-parameter-file=/tmp/workspace-values.yaml
