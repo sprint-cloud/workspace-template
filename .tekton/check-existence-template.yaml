@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: check-existence-template
+spec:
+  params:
+    - name: template-name
+      type: string
+    - name: coder-url
+      type: string
+    - name: coder-token-secret
+      type: string
+  steps:
+    - name: check-template
+      image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+      env:
+        - name: CODER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: $(params.coder-token-secret)
+              key: token
+      script: |
+        coder template versions list $(params.template-name)
+        if [ $0 -eq 0]
+        then
+          echo -n 'true' | tee $(results.template-exists.path)
+        else
+          echo -n 'false' | tee $(results.template-exists.path)
+        fi
