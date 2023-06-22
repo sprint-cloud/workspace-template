@@ -28,4 +28,4 @@ spec:
       script: |
         cd $(workspaces.template.path)
         coder --token $CODER_TOKEN --url $(params.coder-url) \
-        template push -name $(params.template-version) -y $(params.template-name)
+        template push --name $(params.template-version) -y $(params.template-name)
