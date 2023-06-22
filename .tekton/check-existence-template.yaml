@@ -16,7 +16,6 @@ spec:
   steps:
     - name: check-template
       image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
-      onError: continue
       env:
         - name: CODER_TOKEN
           valueFrom:
@@ -24,7 +23,7 @@ spec:
               name: $(params.coder-token-secret)
               key: token
       script: |        
-        if [ coder --token $CODER_TOKEN --url $(params.coder-url) template versions list $(params.template-name) -eq 0 ]
+        if [ $(coder --token $CODER_TOKEN --url $(params.coder-url) template versions list $(params.template-name)) -eq 0 ]
         then
           echo -n 'true' | tee $(results.template-exists.path)
         else
