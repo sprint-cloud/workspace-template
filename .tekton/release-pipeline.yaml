@@ -44,6 +44,7 @@ spec:
           name: create-coder-template
         runAfter:
             - fetch-repository
+        when:
           - input: "$(tasks.check-existence-template.results.template-exists)"
             operator: in
             values: ["false"] 
