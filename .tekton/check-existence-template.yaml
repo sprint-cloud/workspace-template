@@ -23,11 +23,4 @@ spec:
         - name: template-exists
           description: State of Coder template
       script: |
-        echo -n 'true' | tee $(results.check-template.exists)
-        # coder template versions list $(params.template-name)
-        # if [ $0 -eq 0]
-        # then
-        #   echo -n 'true' | tee $(results.template-exists)
-        # else
-        #   echo -n 'false' | tee $(results.template-exists)
-        # fi
+        echo -n 'true' | tee $(results.name.path)
