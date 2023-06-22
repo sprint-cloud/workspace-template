@@ -40,7 +40,7 @@ spec:
     - name: template-name
       value: "workspace-template"
     - name: coder-url
-      value: "https://workspace-testing.luchtenberg.eu"
+      value: "https://workspace.luchtenberg.eu"
   pipelineRef:
     name: coder-release-pipeline
   workspaces:
