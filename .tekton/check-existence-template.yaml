@@ -24,7 +24,7 @@ spec:
               key: token
       script: |
         coder --token $CODER_TOKEN --url $(params.coder-url) \
-        versions list $(params.template-name)
+        template versions list $(params.template-name)
         if [ $0 -eq 0]
         then
           echo -n 'true' | tee $(results.template-exists.path)
