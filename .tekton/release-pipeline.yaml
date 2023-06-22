@@ -44,8 +44,7 @@ spec:
           name: create-coder-template
         runAfter:
             - fetch-repository
-        when:
-          - input: "$(results.check-existence-template.template-exists)"
+          - input: "$(tasks.check-existence-template.results.template-exists)"
             operator: in
             values: ["false"] 
         workspaces:
@@ -64,7 +63,7 @@ spec:
         runAfter:
             - fetch-repository
         when:
-          - input: "$(results.check-existence-template.template-exists)"
+          - input: "$(tasks.check-existence-template.results.template-exists)"
             operator: in
             values: ["true"] 
         workspaces:
