@@ -31,4 +31,4 @@ spec:
       script: |
         cd $(workspaces.template.path)
         coder --token $CODER_TOKEN --url $(params.coder-url) \
-        template push --default-tty $(params.template-default-tty) --name $(params.template-version) -y $(params.template-name)
+        template push --default-ttl $(params.template-default-tty) --name $(params.template-version) -y $(params.template-name)
