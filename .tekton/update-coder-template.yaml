@@ -11,9 +11,6 @@ spec:
       type: string
     - name: template-version
       type: string
-    - name: template-default-tty
-      type: string
-      default: "8h"
     - name: coder-url
       type: string
     - name: coder-token-secret
@@ -31,4 +28,4 @@ spec:
       script: |
         cd $(workspaces.template.path)
         coder --token $CODER_TOKEN --url $(params.coder-url) \
-        template push --default-ttl $(params.template-default-tty) --name $(params.template-version) -y $(params.template-name)
+        template push --name $(params.template-version) -y $(params.template-name)
