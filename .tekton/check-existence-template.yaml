@@ -20,7 +20,7 @@ spec:
               name: $(params.coder-token-secret)
               key: token
       results:
-        - name: exists
+        - name: TEMPLATE_EXISTS
           description: State of Coder template
       script: |
-        echo -n 'true' | tee $(results.exists.path)
+        echo -n 'true' | tee "$(results.TEMPLATE_EXISTS.path)"
