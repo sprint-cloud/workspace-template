@@ -26,7 +26,7 @@ spec:
         coder template versions list $(params.template-name)
         if [ $0 -eq 0]
         then
-          echo -n 'true' | tee $(results.template-exists.path)
+          echo -n 'true' | tee $(results.template-exists)
         else
-          echo -n 'false' | tee $(results.template-exists.path)
+          echo -n 'false' | tee $(results.template-exists)
         fi
