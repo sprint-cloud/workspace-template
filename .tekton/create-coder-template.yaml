@@ -28,4 +28,4 @@ spec:
               key: token
       script: |
         coder --token $CODER_TOKEN --url $(params.coder-url) \
-        template create --inactivity-ttl $(params.template-default-tty) -y -d $(workspaces.template.path) $(params.template-name)
+        template create --default-tty $(params.template-default-tty) -y -d $(workspaces.template.path) $(params.template-name)
