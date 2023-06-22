@@ -10,6 +10,9 @@ spec:
       type: string
     - name: coder-token-secret
       type: string
+  results:
+    - name: template-exists
+      description: State of Coder template
   steps:
     - name: check-template
       image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
@@ -19,8 +22,6 @@ spec:
             secretKeyRef:
               name: $(params.coder-token-secret)
               key: token
-      results:
-        - name: TEMPLATE_EXISTS
-          description: State of Coder template
+
       script: |
-        echo -n 'true' | tee "$(results.TEMPLATE_EXISTS.path)"
+        echo -n 'true' | tee "$(results.template-exists.path)"
