@@ -23,7 +23,7 @@ spec:
               name: $(params.coder-token-secret)
               key: token
       script: |
-        ret=$(coder --token $CODER_TOKEN --url $(params.coder-url) template versions list $(params.template-name))        
+        coder --token $CODER_TOKEN --url $(params.coder-url) template versions list $(params.template-name) || ret=$?
         if [ $ret -eq 0 ]
         then
           echo -n 'true' | tee $(results.template-exists.path)
