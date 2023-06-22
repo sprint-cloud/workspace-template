@@ -23,7 +23,7 @@ spec:
         - name: template-exists
           description: State of Coder template
       script: |
-        echo -n 'true' | tee $(results.template-exists.path)
+        echo -n 'true' | tee $(results.result1.path)
         # coder template versions list $(params.template-name)
         # if [ $0 -eq 0]
         # then
