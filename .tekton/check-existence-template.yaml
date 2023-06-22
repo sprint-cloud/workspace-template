@@ -25,7 +25,7 @@ spec:
       script: |
         coder --token $CODER_TOKEN --url $(params.coder-url) \
         template versions list $(params.template-name)
-        if [ $0 -eq 0]
+        if [ $? -eq 0 ]
         then
           echo -n 'true' | tee $(results.template-exists.path)
         else
