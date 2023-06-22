@@ -16,6 +16,7 @@ spec:
   steps:
     - name: check-template
       image: ghcr.io/sprint-cloud/pipeline-worker:82dc994798d9843640f67c1ac3384072757a3124
+      onError: continue
       env:
         - name: CODER_TOKEN
           valueFrom:
