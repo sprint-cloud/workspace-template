@@ -26,5 +26,6 @@ spec:
               name: $(params.coder-token-secret)
               key: token
       script: |
+        cd $(workspaces.template.path)
         coder --token $CODER_TOKEN --url $(params.coder-url) \
-        template push -y -d $(workspaces.template.path) --name $(params.template-name)
+        template push -y --name $(params.template-name)
