@@ -73,6 +73,8 @@ spec:
         params:
           - name: template-name
             value: $(params.template-name)
+          - name: template-version
+            value: $(params.revision)
           - name: coder-url
             value: $(params.coder-url)
           - name: coder-token-secret

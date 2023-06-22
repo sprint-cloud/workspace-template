@@ -9,6 +9,8 @@ spec:
   params:
     - name: template-name
       type: string
+    - name: template-version
+      type: string
     - name: coder-url
       type: string
     - name: coder-token-secret
