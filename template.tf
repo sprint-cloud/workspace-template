@@ -274,11 +274,6 @@ resource "kubernetes_pod" "main" {
         name       = "tmp-dir"
         read_only  = false
       }
-      volume_mount {
-        mount_path = "/home/coder/docs"
-        name       = "docs"
-        read_only  = false
-      }
     }
 
     volume {
@@ -293,14 +288,6 @@ resource "kubernetes_pod" "main" {
       persistent_volume_claim {
         claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
         read_only  = false
-      }
-    }
-
-    volume {
-      name = "docs"
-      persistent_volume_claim {
-        claim_name = "docs"
-        read_only  = true
       }
     }
 
