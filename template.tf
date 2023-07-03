@@ -71,6 +71,8 @@ resource "coder_agent" "main" {
     set -e
     # Bootstrap home
     cp -r /bootstrap/. /home/coder
+    # Generate DB_URL
+    export DB_URL="postgresql://$DB_USER:$DB_PASS@coder-${lower(data.coder_workspace.me.owner)}-db-rw:5432/postgres"
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
@@ -238,13 +240,22 @@ resource "kubernetes_pod" "main" {
       }
 
       env {
-        name = "DB_URL"
-        value = "coder-${lower(data.coder_workspace.me.owner)}-db-rw"
+        name = "DB_USER"
+        value_from {
+          secret_key_ref {
+            name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
+            key = username
+          }
+        }
       }
 
-      env_from {
-        secret_ref {
-          name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
+      env {
+        name = "DB_PASS"
+        value_from {
+          secret_key_ref {
+            name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
+            key = password
+          }
         }
       }
       resources {
@@ -257,11 +268,6 @@ resource "kubernetes_pod" "main" {
           "memory" = "${data.coder_parameter.memory.value}Gi"
         }
       }
-      volume_mount {
-        mount_path = "/db-superuser"
-        name       = "db-superuser"
-        read_only  = true
-      }
 
       volume_mount {
         mount_path = "/home/coder"
@@ -273,13 +279,6 @@ resource "kubernetes_pod" "main" {
         mount_path = "/tmp"
         name       = "tmp-dir"
         read_only  = false
-      }
-    }
-
-    volume {
-      name = "db-superuser"
-      secret {
-        secret_name = "coder-${lower(data.coder_workspace.me.owner)}-db-superuser"
       }
     }
 
