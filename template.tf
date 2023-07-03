@@ -244,7 +244,7 @@ resource "kubernetes_pod" "main" {
         value_from {
           secret_key_ref {
             name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
-            key = username
+            key = "username"
           }
         }
       }
@@ -254,7 +254,7 @@ resource "kubernetes_pod" "main" {
         value_from {
           secret_key_ref {
             name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
-            key = password
+            key = "password"
           }
         }
       }
