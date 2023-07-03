@@ -72,7 +72,7 @@ resource "coder_agent" "main" {
     # Bootstrap home
     cp -r /bootstrap/. /home/coder
     # Generate DB_URL
-    export DB_URL="postgresql://$DB_USER:$DB_PASS@coder-${lower(data.coder_workspace.me.owner)}-db-rw:5432/postgres"
+    export DB_URL="postgresql://$DB_USER:$DB_PASS@coder-${lower(data.coder_workspace.me.owner)}-db-rw:5432/$DB_USER"
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
