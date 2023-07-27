@@ -220,7 +220,7 @@ resource "kubernetes_pod" "main" {
     }
     container {
       name              = "dev"
-      image             = "ghcr.io/sprint-cloud/workspace-image:0e9a9524b9cf8816866985f31c7bb3b848f38abb"
+      image             = "ghcr.io/sprint-cloud/workspace-image:7affed2226f78c56cf8c8306fc12c19d4ed9eddf"
       image_pull_policy = "Always"
       command           = ["sh", "-c", coder_agent.main.init_script]
       security_context {
