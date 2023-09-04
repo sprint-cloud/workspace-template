@@ -75,7 +75,7 @@ resource "coder_agent" "main" {
     export DB_URL="postgresql://$DB_USER:$DB_PASS@coder-${lower(data.coder_workspace.me.owner)}-db-rw:5432/$DB_USER"
 
     # Set home perms
-    chmod -R 600 /home/coder/.ssh
+    chmod -R 700 /home/coder/.ssh
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
