@@ -18,74 +18,46 @@ provider "coder" {
 variable "namespace" {
   type        = string
   description = "The Kubernetes namespace to create workspaces in (must exist prior to creating workspaces)"
-  default = "coder-workspaces"
+  default = "coder"
 }
 
-data "coder_parameter" "cpu" {
-  name    = "CPU (cores)"
-  default = "2"
-  icon    = "/icon/memory.svg"
-  mutable = true
-  option {
-    name  = "2 Cores"
-    value = "2"
-  }
+variable "userdata_disk_size" {
+  type = number
+  default = 15
 }
 
-data "coder_parameter" "memory" {
-  name    = "Memory (GB)"
-  default = "2"
-  icon    = "/icon/memory.svg"
-  mutable = true
-  option {
-    name  = "2 GB"
-    value = "2"
-  }
-}
-
-data "coder_parameter" "home_disk_size" {
-  name    = "Home Disk Size (GB)"
-  default = "10"
-  type    = "number"
-  icon    = "/emojis/1f4be.png"
-  mutable = false
-  validation {
-    min = 1
-    max = 10
-  }
-}
-
-data "coder_paramater" "workspace_image" {
+data "coder_parameter" "workspace_image" {
   name    = "Worspace Image"
-  default = "Python"
+  default = "ghcr.io/sprint-cloud/workspace-python:production"
   mutable = true
+
+  option {
+    name = "Base"
+    value = "ghcr.io/sprint-cloud/workspace-base:production"
+  }
 
   option {
     name = "Python"
-    value = "ghcr.io/sprint-cloud/workspace-image:4dd986a00b31f62ea6aa13fbdf19ac88922aec5f"
+    value = "ghcr.io/sprint-cloud/workspace-python:production"
   }
 }
 
-data "coder_paramater" "database_type" {
+data "coder_parameter" "database_image" {
   name    = "Database Type"
-  default = "redis"
+  default = "redis:7.2.1-alpine"
   mutable = true
   
   option {
-    name = "None"
-    value = "none"
-  }
-
-  option {
     name = "Redis"
-    value = "redis"
+    value = "redis:7.2.1-alpine"
   }
 
   option {
     name = "Postgresql"
-    value = "postgres"
+    value = "postgres:16.0-alpine"
   }
 }
+
 
 provider "kubernetes" {
   # Authenticate via ~/.kube/config or a Coder-specific ServiceAccount, depending on admin preferences
@@ -101,6 +73,10 @@ resource "coder_agent" "main" {
   startup_script_timeout = 180
   startup_script         = <<-EOT
     set -e
+    # Bootstrap Home
+    if [ ! -d "/userdata/home" ]; then
+      cp -r /bootstrap /userdata/home
+    fi
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
@@ -125,9 +101,9 @@ resource "coder_app" "code-server" {
   }
 }
 
-resource "kubernetes_persistent_volume_claim" "home" {
+resource "kubernetes_persistent_volume_claim" "userdata" {
   metadata {
-    name      = "coder-${lower(data.coder_workspace.me.owner)}-home"
+    name      = "coder-${lower(data.coder_workspace.me.owner)}-userdata"
     namespace = var.namespace
     labels = {
       "app.kubernetes.io/name"     = "coder-pvc"
@@ -149,7 +125,7 @@ resource "kubernetes_persistent_volume_claim" "home" {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "${data.coder_parameter.home_disk_size.value}Gi"
+        storage = "${var.userdata_disk_size}Gi"
       }
     }
   }
@@ -187,7 +163,7 @@ resource "kubernetes_pod" "main" {
     }
     container {
       name              = "dev"
-      image             = "ghcr.io/sprint-cloud/workspace-image:4dd986a00b31f62ea6aa13fbdf19ac88922aec5f"
+      image             = "${data.coder_parameter.workspace_image.value}"
       image_pull_policy = "Always"
       command           = ["sh", "-c", coder_agent.main.init_script]
       security_context {
@@ -201,10 +177,12 @@ resource "kubernetes_pod" "main" {
             }
        
       }
+      
       env {
         name  = "CODER_AGENT_TOKEN"
         value = coder_agent.main.token
       }
+
 
       resources {
         requests = {
@@ -212,14 +190,14 @@ resource "kubernetes_pod" "main" {
           "memory" = "512Mi"
         }
         limits = {
-          "cpu"    = "${data.coder_parameter.cpu.value}"
-          "memory" = "${data.coder_parameter.memory.value}Gi"
+          "cpu"    = "2"
+          "memory" = "2Gi"
         }
       }
 
       volume_mount {
-        mount_path = "/home/coder"
-        name       = "home"
+        mount_path = "/userdata"
+        name       = "userdata"
         read_only  = false
       }
 
@@ -230,10 +208,48 @@ resource "kubernetes_pod" "main" {
       }
     }
 
+    container {
+      name              = "database"
+      image             = "${data.coder_parameter.database_image.value}"
+      image_pull_policy = "Always"
+      env {
+        name = "POSTGRES_PASSWORD"
+        value = "sprint"
+      }
+      security_context {
+        run_as_user = "1000"
+        allow_privilege_escalation = false
+        privileged = false
+        run_as_non_root = true
+        read_only_root_filesystem = true
+        capabilities {
+              drop = ["ALL"]
+            }
+       
+      }
+
+      resources {
+        requests = {
+          "cpu"    = "250m"
+          "memory" = "256Mi"
+        }
+        limits = {
+          "cpu"    = "250m"
+          "memory" = "512Mi"
+        }
+      }
+
+      volume_mount {
+        mount_path = "/tmp"
+        name       = "tmp-dir"
+        read_only  = false
+      }
+    }
+
     volume {
-      name = "home"
+      name = "userdata"
       persistent_volume_claim {
-        claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
+        claim_name = kubernetes_persistent_volume_claim.userdata.metadata.0.name
         read_only  = false
       }
     }
