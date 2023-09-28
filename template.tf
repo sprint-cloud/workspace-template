@@ -55,6 +55,38 @@ data "coder_parameter" "home_disk_size" {
   }
 }
 
+data "coder_paramater" "workspace_image" {
+  name    = "Worspace Image"
+  default = "Python"
+  mutable = true
+
+  option {
+    name = "Python"
+    value = "ghcr.io/sprint-cloud/workspace-image:4dd986a00b31f62ea6aa13fbdf19ac88922aec5f"
+  }
+}
+
+data "coder_paramater" "database_type" {
+  name    = "Database Type"
+  default = "redis"
+  mutable = true
+  
+  option {
+    name = "None"
+    value = "none"
+  }
+
+  option {
+    name = "Redis"
+    value = "redis"
+  }
+
+  option {
+    name = "Postgresql"
+    value = "postgres"
+  }
+}
+
 provider "kubernetes" {
   # Authenticate via ~/.kube/config or a Coder-specific ServiceAccount, depending on admin preferences
   config_path = null
@@ -69,14 +101,6 @@ resource "coder_agent" "main" {
   startup_script_timeout = 180
   startup_script         = <<-EOT
     set -e
-    # Bootstrap home
-    cp -r /bootstrap/. /home/coder
-    # Generate DB_URL
-    export DB_URL="postgresql://$DB_USER:$DB_PASS@coder-${lower(data.coder_workspace.me.owner)}-db-rw:5432/$DB_USER"
-
-    # Set home perms
-    chmod -R 700 /home/coder/.ssh
-
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
@@ -98,66 +122,6 @@ resource "coder_app" "code-server" {
     url       = "http://localhost:13337/healthz"
     interval  = 3
     threshold = 10
-  }
-}
-
-### Dev database
-resource "kubernetes_manifest" "dev-database" {
-  manifest = {
-    apiVersion = "postgresql.cnpg.io/v1"
-    kind = "Cluster"
-    metadata = {
-      name = "coder-${lower(data.coder_workspace.me.owner)}-db"
-      namespace = var.namespace
-      labels = {
-        "spint.resource.type" = "dev-db"
-      }  
-    }
-
-    spec = {
-      instances = 1
-      primaryUpdateStrategy = "unsupervised"
-      storage = {
-        size = "1Gi"
-      }
-      monitoring = {
-        enablePodMonitor = true
-      }
-    }
-  }
-  
-}
-
-resource "kubernetes_network_policy_v1" "allow-db-connections" {
-  metadata {
-    name = "coder-${lower(data.coder_workspace.me.owner)}-db"
-    namespace = var.namespace
-  }
-  spec {
-    pod_selector {
-        match_expressions {
-              key      = "cnpg.io/cluster"
-              operator = "In"
-              values   = ["coder-${lower(data.coder_workspace.me.owner)}-db"]
-            }
-    }
-  ingress {
-    ports {
-        port     = "5432"
-        protocol = "TCP"
-    }
-    from {
-      pod_selector {
-        match_expressions {
-          key      = "com.coder.user.username"
-          operator = "In"
-          values   = [data.coder_workspace.me.owner]
-        }
-      }
-    }
-
-  }
-    policy_types = ["Ingress"]
   }
 }
 
@@ -242,25 +206,6 @@ resource "kubernetes_pod" "main" {
         value = coder_agent.main.token
       }
 
-      env {
-        name = "DB_USER"
-        value_from {
-          secret_key_ref {
-            name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
-            key = "username"
-          }
-        }
-      }
-
-      env {
-        name = "DB_PASS"
-        value_from {
-          secret_key_ref {
-            name = "coder-${lower(data.coder_workspace.me.owner)}-db-app"
-            key = "password"
-          }
-        }
-      }
       resources {
         requests = {
           "cpu"    = "250m"

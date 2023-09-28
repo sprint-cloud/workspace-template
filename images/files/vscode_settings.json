@@ -1,0 +1,15 @@
+{
+    "vscode-kubernetes.kubectl-path": "/usr/local/bin/kubectl",
+    "vscode-kubernetes.helm-path": "/usr/local/bin/helm",
+    "workbench.colorTheme": "Visual Studio Dark",
+ 
+    "vs-kubernetes": {
+        "vs-kubernetes.ignore-recommendations": true
+    },
+    "redhat.telemetry.enabled": false,
+    "files.exclude": {
+            ".*": true,
+            "lost+found": true
+    }
+  
+}
