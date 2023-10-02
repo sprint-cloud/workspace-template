@@ -1,13 +1,17 @@
 FROM ubuntu:jammy
 LABEL org.opencontainers.image.source https://github.com/sprint-cloud/workspace-template
 
-RUN apt-get update 
-RUN apt-get install -y \
+RUN 
+
+RUN apt-get update \
+    && apt-get install -y \
     zsh \
     git \
     curl \
     postgresql-client \
     redis-tools \
+    python3 \
+    python3-venv \
     && apt-get clean
 
 # Create user
